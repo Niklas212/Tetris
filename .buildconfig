@@ -1,0 +1,13 @@
+[default]
+name=Default
+runtime=host
+toolchain=default
+config-opts=
+run-opts=
+prefix=/home/niklas/.cache/gnome-builder/install/Tetris/host
+app-id=
+postbuild=
+prebuild=
+default=true
+
+[default.environment]
