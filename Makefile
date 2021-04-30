@@ -1,4 +1,4 @@
-all: tetris
+all: t
 
 WARNINGS = -Wall
 DEBUG = -ggdb -fno-omit-frame-pointer
@@ -6,8 +6,8 @@ OPTIMIZE = -O2
 NAME = TETRIS
 
 
-tetris:
-	$(CC) $(WARNINGS) $(DEBUG) $(OPTIMIZE) src/gui.c src/tetris.c src/tetris.h -lallegro -lallegro_primitives -lallegro_font -lallegro_ttf -o $(NAME)
+t:
+	gcc src/gui.c src/tetris.c src/tetris.h -lallegro -lallegro_primitives -lallegro_font -lallegro_ttf -o $(NAME)
 
 
 clean:

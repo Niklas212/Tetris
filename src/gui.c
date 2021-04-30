@@ -38,7 +38,7 @@ const Piece piece_list[7] = {
 };
 
 struct Layout{
-  ALLEGRO_FONT *game_over_font;
+  ALLEGRO_FONT *game_over_font, *score_font;
   int grid_size, margin_left, margin_top, width, height;
 } layout;
 
@@ -58,7 +58,11 @@ void update_layout_sizes(ALLEGRO_DISPLAY *display) {
   layout.margin_left = (layout.width - layout.grid_size * COLS) / 2;
   layout.margin_top = (layout.height - layout.grid_size * ROWS - TOP_MARGIN) / 2 + TOP_MARGIN;
 
-  //layout.game_over_font = al_load_font (font_path, layout.grid_size * 0.75, 0);
+  al_destroy_font (layout.game_over_font);
+  layout.game_over_font = al_load_font (font_path, layout.grid_size * 0.8, 0);
+
+  al_destroy_font (layout.score_font);
+  layout.score_font = al_load_font (font_path, layout.grid_size * 0.7, 0);
 }
 
 int get_score(unsigned int amount) {
@@ -177,8 +181,13 @@ int main (int argc, char *argv[])
         //game over screen
         al_draw_filled_rounded_rectangle (x + grid_size - GRID_PADDING, y + 6 * grid_size - GRID_PADDING, x + 9 * grid_size + GRID_PADDING, y + 14 * grid_size + GRID_PADDING, grid_size / 2, grid_size / 2, al_map_rgba_f (0, 0, 0, 0.9));
         //game over text
-        al_draw_text (font, al_map_rgb(200, 0, 0), layout.width / 2, y + 6 * grid_size, ALLEGRO_ALIGN_CENTER, "GAME OVER");
-
+        al_draw_text (layout.game_over_font, al_map_rgb(200, 0, 0), layout.width / 2, y + 6 * grid_size, ALLEGRO_ALIGN_CENTER, "GAME OVER");
+        //score
+        al_draw_textf (layout.score_font, al_map_rgb_f (1, 1, 1), x + grid_size + GRID_PADDING, y + 8 * grid_size, 0, "score: %d", score);
+        //button
+        al_draw_rounded_rectangle (x + 2 * grid_size, y + 12.5 * grid_size, x + 8 * grid_size, y + 13.5 * grid_size, grid_size / 5, grid_size / 5, al_map_rgb_f (1, 1, 1), grid_size / 10);
+        //button_text
+        al_draw_text (layout.score_font, al_map_rgb_f (1, 1, 1), layout.width / 2, y + 12.5 * grid_size, ALLEGRO_ALIGN_CENTER, "restart");
       }
 
       al_flip_display ();
@@ -195,27 +204,27 @@ int main (int argc, char *argv[])
         update_layout_sizes (display);
         break;
       }
-    case ALLEGRO_EVENT_TIMER: {
-      tetris->piece_pos_y ++;
-      int status = tetris_possible_piece_position (tetris, piece);
-      if (status == 1)
-        tetris->piece_pos_y --;
-      else if (status == 2) {
-        tetris->piece_pos_y --;
-        tetris_add_piece (tetris, piece);
-        tetris->piece_pos_x = 4;
-        tetris->piece_pos_y = 0;
-        piece_copy_to (&piece_list[rand() % 7], piece);
-        int s = tetris_clear_line (tetris);
-        if (!s) {
-          game_over = 1;
-          al_stop_timer (game_timer);
+      case ALLEGRO_EVENT_TIMER: {
+        tetris->piece_pos_y ++;
+        int status = tetris_possible_piece_position (tetris, piece);
+        if (status == 1)
+          tetris->piece_pos_y --;
+        else if (status == 2) {
+          tetris->piece_pos_y --;
+          tetris_add_piece (tetris, piece);
+          tetris->piece_pos_x = 4;
+          tetris->piece_pos_y = 0;
+          piece_copy_to (&piece_list[rand() % 7], piece);
+          int s = tetris_clear_line (tetris);
+          if (!s) {
+            game_over = 1;
+            al_stop_timer (game_timer);
+          }
+          else
+            score +=  get_score (s - 1);
         }
-        else
-          score +=  get_score (s - 1);
+        break;
       }
-      break;
-    }
       case ALLEGRO_EVENT_KEY_DOWN: {
         switch(event.keyboard.keycode) {
           case ALLEGRO_KEY_LEFT: {
@@ -258,12 +267,31 @@ int main (int argc, char *argv[])
         }
         break;
       }
+      case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN: {
+        int x = event.mouse.x;
+        int y = event.mouse.y;
+
+        int in_x = x > layout.margin_left + 2 * layout.grid_size && x < layout.margin_left + 8 * layout.grid_size;
+        int in_y = y > layout.margin_top + 12.5 * layout.grid_size && y < layout.margin_top + 13.5 * layout.grid_size;
+
+        if (in_x && in_y) {
+            score = game_over = 0;
+            tetris_clear_field (tetris);
+            tetris->piece_pos_x = 4;
+            tetris->piece_pos_y = 0;
+            piece_copy_to (&piece_list[rand() % 7], piece);
+            al_start_timer (game_timer);
+        }
+        break;
+      }
     }
   }
 
   al_destroy_display (display);
   al_destroy_timer (game_timer);
   al_destroy_font(font);
+  al_destroy_font (layout.score_font);
+  al_destroy_font (layout.game_over_font);
   al_destroy_event_queue (queue);
   al_uninstall_keyboard ();
   al_uninstall_mouse ();
