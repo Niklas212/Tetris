@@ -37,20 +37,6 @@ void piece_rotate(Piece *piece) {
       (piece->field[x + y * w]) = copy[y + (w - x - 1) * w];
 }
 
-void rotate_piece(unsigned short *(piece)) {
-  int i;
-  unsigned short p[9];
-
-  for (i = 0; i<9; i++) {
-    p[i] = *(piece + i);
-  }
-
-  for (i = 0; i < 3; i++) {
-    piece[6 + i] = p[3 * i];
-    piece[3 + i] = p[3 * i + 1];
-    piece[i] = p[3 * i + 2];
-  }
-}
 
 void piece_copy_to(Piece *copy, Piece *duplicate) {
   duplicate->height = copy->height;
@@ -61,22 +47,6 @@ void piece_copy_to(Piece *copy, Piece *duplicate) {
   }
 }
 
-void print_piece(unsigned short *(piece)) {
-  int i;
-  for (i = 0; i<3; i++) {
-    printf("%d %d %d\n", *(piece + i * 3), *(piece + i * 3 + 1), *(piece +i * 3 + 2));
-  }
-}
-
-void array_print(unsigned short *map, int width, int height) {
-  int y,x;
-  for (y = 0; y<height; y++) {
-    for (x = 0; x<width; x++) {
-      printf ("%d_",*(map + y * width + x));
-    }
-    printf("\n");
-  }
-}
 
 void piece_print(Piece *piece) {
   int y,x;
@@ -133,7 +103,7 @@ int tetris_clear_line (Tetris *tetris) {
 
   for (; y < 2; y++ ) {
     for (x = 0; x < COLS; x++) {
-      //printf("(w,h)[%d][%d] =>%d\n", y, x, *(f + x + y * COLS));
+
       if( *(f + x + y * COLS) != 0)
         return 0;
     }
@@ -174,14 +144,13 @@ int tetris_possible_piece_position(Tetris *tetris, Piece *piece) {
   int x,y;
   int in_grid_x, in_grid_y, is_null;
 
- // printf("pos_x:%d ,pos_y:%d ,width:%d ,height:%d\n", piece_x, piece_y, piece_width, piece_height);
 
   for (y = 0; y < piece_height; y ++) {
     for (x = 0; x < piece_width; x ++) {
       in_grid_x = ((piece_x + x) >= 0 && (piece_x + x) < COLS) ? 1 : 0;
       in_grid_y = ((piece_y + y) >=0 && (piece_y + y) < ROWS) ? 1 : 0;
       is_null = ( *(f + y * piece_width + x) == 0) ? 1 : 0;
-     // printf("(h,w)[%d][%d]=>x:%d ,y:%d , n:%d \n", y, x, in_grid_x, in_grid_y, is_null);
+
       if (is_null || (in_grid_x && in_grid_y) ) {
         if (!is_null && (tetris->field[piece_y + y][piece_x + x] != 0))
           ret = 2;
@@ -194,67 +163,4 @@ int tetris_possible_piece_position(Tetris *tetris, Piece *piece) {
 
   return ret;
 }
-/*
-int main (int argc, char *argv[])
-{
 
-  unsigned short p2[9] = {0,1,2,3,4,5,6,7,8};
-  unsigned short p[3][3] = {{1,2,3},{4,5,6},{7,8,9}};
-  //unsigned short f[20][10] =
-  int a = 5;
-  int *pa = &a;
-  //int map[5][3] = {{1,2,3},{2,4,6},{9,8,7},{3,6,9},{0,1,0}};
-
-  Piece *piece_1 = (Piece*) malloc (sizeof (Piece));
-  piece_1->field = &p[0][0];
-  piece_1->width = 3;
-  piece_1->height = 3;
-
-  piece_print (piece_1);
-
-  Tetris *tetris = (Tetris*) malloc (sizeof (Tetris));
-  tetris->field[2][3] = 9;
-  tetris->piece_pos_x = 1;
-  tetris->piece_pos_y = 1;
-
-  array_print ((unsigned short*)&(tetris->field[0][0]), COLS, ROWS);
-  printf("\n");
-  tetris->piece_pos_y = 2;
-  tetris->piece_pos_x = 0;
-  add_piece(tetris, piece_1);
-  tetris->piece_pos_x = 3;
-  add_piece(tetris, piece_1);
-  tetris->piece_pos_x = 6;
-  add_piece(tetris, piece_1);
-  tetris->piece_pos_x = 7;
-  add_piece (tetris, piece_1);
-  //tetris->field[2][5] = 0;
-
-  array_print ((unsigned short*)&(tetris->field[0][0]), COLS, ROWS);
-
-
-  print_piece (p2);
-  rotate_piece (p2);
-  print_piece (p2);
-  printf("\n");
-  //piece_1->height = 6;
-  tetris->piece_pos_y = 1;
-
-  //printf("%d\n", tetris_possible_piece_position (tetris, piece_1));
-  //unsigned short *ttt = tetris_get_snapshot (tetris, piece_1);
-  //printf("%d  %d<>%d\n", *(ttt + 13), ttt, &tetris->field[0][0]);
-
-  printf(">>%d\n", tetris_clear_line (tetris));
-
-
-  array_print(&(tetris->field[0][0]), 10, 20);
-
-
-
- // free(ttt);
-  free (tetris);
-  free (piece_1);
-
-  return EXIT_SUCCESS;
-}
-*/

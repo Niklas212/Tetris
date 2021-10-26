@@ -43,8 +43,6 @@ struct Layout{
 } layout;
 
 
-// TODO: just for debugging
-void array_print(unsigned short *map, int width, int height);
 
 void update_layout_sizes(ALLEGRO_DISPLAY *display) {
 
